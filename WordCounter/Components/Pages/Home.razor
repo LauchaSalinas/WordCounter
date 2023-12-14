@@ -1,0 +1,162 @@
+﻿@page "/"
+
+@using CommunityToolkit.Maui.Alerts
+@using CommunityToolkit.Maui.Core
+@using CommunityToolkit.Maui.Storage
+
+<h3>Word Counter</h3>
+
+<br />
+<div class="buttonsContainerFolderSelection">
+    <button @onclick="PickFolder" disabled="@processing">Select Folder</button>
+    <button @onclick="ProcessSelectedFolder" disabled="@(string.IsNullOrEmpty(rootFolderPath) || processing)">Process Folder</button>
+</div>
+
+<div>
+    <label for="rootFolderPath">Root Folder Path:</label>
+    <input id="rootFolderPath" type="text" readonly value="@rootFolderPath" style="width: 300px;" />
+</div>
+
+<br />
+
+<div>
+    <label for="totalWordsAllFiles">Total Words:</label>
+    <label id="totalWordsAllFiles" style="width: 300px;">@totalWordsAllFiles</label>
+</div>
+
+<br />
+
+<table>
+    <thead>
+        <tr>
+            <th class="fileColumn">File</th> <th class="wordsColumn">Words</th>
+        </tr>
+    </thead>
+    @foreach (var result in wordCountResults.ToList())
+    {
+        <tr>
+            <td class="fileColumn">@result.FileName</td>
+            <td class="wordsColumn">@result.WordCount</td>
+        </tr>
+    }
+</table>
+
+@code {
+    private string rootFolderPath = string.Empty;
+    private List<WordCountResult> wordCountResults = new List<WordCountResult>();
+    private int totalWordsAllFiles = 0;
+    private bool processing = false;
+
+    private class WordCountResult
+    {
+        public string FileName { get; set; }
+        public int WordCount { get; set; }
+    }
+
+    async Task PickFolder()
+    {
+        var result = await FolderPicker.Default.PickAsync();
+        if (result.IsSuccessful)
+        {
+            //await Toast.Make($"The folder was picked: Name - {result.Folder.Name}, Path - {result.Folder.Path}", ToastDuration.Long).Show();
+            rootFolderPath = result.Folder.Path;
+            StateHasChanged();
+        }
+        else
+        {
+            await Toast.Make($"The folder was not picked with error: {result.Exception.Message}").Show();
+        }
+    }
+
+    async Task ProcessSelectedFolder()
+    {
+        processing = true;
+
+
+        wordCountResults.Clear(); // Clear previous results
+        await Task.Run(async () => await ProcessFolder(rootFolderPath));
+
+        processing = false;
+
+        StateHasChanged(); // Update the UI after processing the folder
+    }
+
+
+    private async Task ProcessFolder(string folderPath)
+    {
+        string[] pdfFiles = Directory.GetFiles(folderPath, "*.pdf");
+        string folderName = new DirectoryInfo(folderPath).Name;
+        Console.WriteLine($"{folderName}:");
+        foreach (string pdfFile in pdfFiles)
+        {
+            int wordCount = GetWordCountFromPdf(pdfFile);
+
+            string fileName = Path.GetFileName(pdfFile);
+
+            Console.WriteLine($"{wordCount}, {fileName} ");
+
+            wordCountResults.Add(new WordCountResult
+                {
+                    FileName = fileName,
+                    WordCount = wordCount
+                });
+            await InvokeAsync(() => StateHasChanged());
+            totalWordsAllFiles += wordCount;
+        }
+
+        int totalFiles = pdfFiles.Length;
+        //Console.WriteLine($"Total PDF files in {folderName}: {totalFiles}");
+
+        string[] subfolders = Directory.GetDirectories(folderPath);
+        foreach (string subfolder in subfolders)
+        {
+            await ProcessFolder(subfolder);
+        }
+    }
+
+    private int GetWordCountFromPdf(string pdfFilePath)
+    {
+        string pdfText = ExtractTextFromPdf(pdfFilePath);
+        return CountWords(pdfText);
+    }
+
+    private string ExtractTextFromPdf(string pdfFilePath)
+    {
+        using (iText.Kernel.Pdf.PdfDocument pdfDocument = new iText.Kernel.Pdf.PdfDocument(new PdfReader(pdfFilePath)))
+        {
+            StringWriter textWriter = new StringWriter();
+            for (int page = 1; page <= pdfDocument.GetNumberOfPages(); page++)
+            {
+                var strategy = new SimpleTextExtractionStrategy();
+                PdfCanvasProcessor parser = new PdfCanvasProcessor(strategy);
+                parser.ProcessPageContent(pdfDocument.GetPage(page));
+                textWriter.WriteLine(strategy.GetResultantText());
+            }
+            return textWriter.ToString();
+        }
+    }
+
+    private int CountWords(string text)
+    {
+        // Split the text into words and count them
+        string[] words = text.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        var wordsList = words.ToList();
+        if (wordsList.Contains("•"))
+        {
+            wordsList.RemoveAll(x => x == "•");
+        }
+
+        if (wordsList.Contains("·"))
+        {
+            wordsList.RemoveAll(x => x == "·");
+        }
+
+        ////print every word
+        //foreach (string word in wordsList)
+        //{
+        //    Console.WriteLine(word);
+        //}
+
+        return wordsList.Count;
+    }
+}
