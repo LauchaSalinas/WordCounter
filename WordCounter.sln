@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCounter", "WordCounter\WordCounter.csproj", "{208E3C32-8745-4A1F-9821-56D98927CD27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WordCounter", "WordCounter\WordCounter.csproj", "{208E3C32-8745-4A1F-9821-56D98927CD27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCounterBase", "WordCounterBase\WordCounterBase.csproj", "{F07CB610-6E0B-441E-A0D5-82F3E2B0642F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,10 @@ Global
 		{208E3C32-8745-4A1F-9821-56D98927CD27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{208E3C32-8745-4A1F-9821-56D98927CD27}.Release|Any CPU.Build.0 = Release|Any CPU
 		{208E3C32-8745-4A1F-9821-56D98927CD27}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F07CB610-6E0B-441E-A0D5-82F3E2B0642F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F07CB610-6E0B-441E-A0D5-82F3E2B0642F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F07CB610-6E0B-441E-A0D5-82F3E2B0642F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F07CB610-6E0B-441E-A0D5-82F3E2B0642F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

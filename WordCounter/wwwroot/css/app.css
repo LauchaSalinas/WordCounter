@@ -79,7 +79,8 @@ td, th {
     width: 350px;
 }
 
-.wordsColumn {
+.wordsColumn,
+.scannedColumn{
     text-align: center;
 }
 
