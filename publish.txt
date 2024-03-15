@@ -1,0 +1,5 @@
+dotnet publish -f net8.0-windows10.0.19041.0 -c RELEASE /p:RuntimeIdentifierOverride=win10-x64 -p:WindowsAppSDKSelfContained=true -p:WindowsPackageType=None
+
+opc 2
+
+dotnet publish -f net8.0-windows10.0.19041.0 -c RELEASE /p:RuntimeIdentifierOverride=win10-x64
