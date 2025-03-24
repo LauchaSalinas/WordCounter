@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Tesseract;
+using WordCounterBase.Models;
 
 
 namespace WordCounterBase.Processors
@@ -7,7 +8,7 @@ namespace WordCounterBase.Processors
     public static class ImageProcessor
     {
 
-        public static int GetWordCount(string path)
+        public static ImageProcessingResult GetWordCount(string path)
         {
             string tesseractDataPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly()?.Location);
 
@@ -15,7 +16,10 @@ namespace WordCounterBase.Processors
             var img = Pix.LoadFromFile(path);
             var res = ocrengine.Process(img);
             var text = res.GetText();
-            return WordProcessor.CountWords(text);
+            return new ImageProcessingResult()
+            {
+                WordCount = WordCounter.CountWords(text)
+            };
         }
     }
 }

@@ -14,7 +14,7 @@ namespace WordCounterBase.Processors
             JObject jsonObject = JObject.Parse(jsonString);
             ExtractTextFromJsonObject(jsonObject);
 
-            int wordCount = WordProcessor.CountWords(StringResult);
+            int wordCount = WordCounter.CountWords(StringResult);
             return new JsonProcessingResult() { WordCount = wordCount };
         }
 

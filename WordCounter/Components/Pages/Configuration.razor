@@ -5,6 +5,7 @@
 
 <h3>Configuration</h3>
 
+<label>Name of the json keys to consider to count words (Comma separated)</label>
 <input id="regexJson" @bind-value="@ImportKeys" type="text" style="width: 300px;" />
 
 
@@ -24,7 +25,7 @@
     void ChangeImportKey()
     {
         if (string.IsNullOrEmpty(_ImportKeys)) return;
-        JsonProcessingConfiguration.ImportKeys = _ImportKeys.Split(',').ToList();
+        JsonProcessingConfiguration.ImportKeys = _ImportKeys.Split(',', StringSplitOptions.TrimEntries).ToList();
     }
 
     private ValueTask OnLocationChanging(LocationChangingContext context)

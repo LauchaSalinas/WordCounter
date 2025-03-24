@@ -1,6 +1,6 @@
 ﻿namespace WordCounterBase.Processors
 {
-    internal class WordProcessor
+    internal class WordCounter
     {
         public static int CountWords(string text)
         {

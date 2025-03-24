@@ -1,7 +1,6 @@
 ﻿using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf;
-using PdfiumViewer;
 using System.Drawing;
 using WordCounterBase.Models;
 
@@ -16,7 +15,7 @@ namespace WordCounterBase.Processors
             int totalPages = pdfDocument.GetNumberOfPages();
 
             string pdfText = ExtractTextFromPdf(pdfDocument);
-            int wordCount = WordProcessor.CountWords(pdfText);
+            int wordCount = WordCounter.CountWords(pdfText);
             return new PdfProcessingResult() { PageCount = totalPages, WordCount = wordCount };
         }
 

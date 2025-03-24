@@ -1,6 +1,6 @@
 ﻿namespace WordCounterBase.Models
 {
-    public class WordCountResult
+    public class ProcessFileResult
     {
         public required string FileName { get; set; }
         public int WordCount { get; set; }

@@ -4,8 +4,7 @@
 @using CommunityToolkit.Maui.Core
 @using CommunityToolkit.Maui.Storage
 @using WordCounterBase.Models
-@using WordCounterBase.Processors
-@using System.Diagnostics
+@using WordCounterBase.Services
 
 <h3>Word Counter</h3>
 
@@ -34,7 +33,7 @@
 
 <div>
     <label for="timeSpentQuery">Duration:</label>
-    <label id="timeSpentQuery" style="width: 300px;">@timeSpentQuery.ToString()</label>
+    <label id="timeSpentQuery" style="width: 300px;">@wordCountResults.ElapsedTime.ToString()</label>
 </div>
 
 <br />
@@ -55,7 +54,7 @@ else
                 <th class="scannedColumn">Scanned</th>
             </tr>
         </thead>
-        @foreach (var result in wordCountResults.ToList())
+        @foreach (var result in wordCountResults.Files.ToList())
         {
             <tr>
                 <td class="fileColumn">@result.FileName.Replace(rootFolderPath+"\\", string.Empty)</td>
@@ -70,9 +69,8 @@ else
 
 @code {
     private string rootFolderPath = string.Empty;
-    private List<WordCountResult> wordCountResults = new List<WordCountResult>();
+    private ProcessFolderResult wordCountResults = new ();
     private int totalWordsAllFiles = 0;
-    private TimeSpan timeSpentQuery = TimeSpan.Zero;
     private int totalPagesAllFiles = 0;
     private bool processing = false;
 
@@ -96,25 +94,23 @@ else
         processing = true;
         StateHasChanged();
 
-        wordCountResults.Clear(); // Clear previous results
+        wordCountResults.Files.Clear(); // Clear previous results
 
-        var stpwtch = new Stopwatch();
-        stpwtch.Start();
+        
 
         await Task.Run(() =>
         {
-            wordCountResults = FolderProcessor.ProcessFolder(rootFolderPath);
+            wordCountResults = WordCounterService.ProcessFolder(rootFolderPath);
         });
 
 
-        totalWordsAllFiles = wordCountResults.Sum(result => result.WordCount);
-        totalPagesAllFiles = wordCountResults.Sum(result => result.PageCount);
-        stpwtch.Stop();
-        timeSpentQuery = stpwtch.Elapsed;
+        totalWordsAllFiles = wordCountResults.Files.Sum(result => result.WordCount);
+        totalPagesAllFiles = wordCountResults.Files.Sum(result => result.PageCount);
+
 
         processing = false;
 
-        StateHasChanged(); // Update the UI after processing the folder
+        StateHasChanged();
     }
 
 
