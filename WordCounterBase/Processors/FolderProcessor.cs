@@ -10,9 +10,9 @@ namespace WordCounterBase.Processors
         {
             var result = new List<WordCountResult>();
 
-            var files = Directory.EnumerateFiles(folderPath, "*.*");
-            var imageFiles = files.Where(file => ext.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase))).ToList();
-            var pdfFiles = files.Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
+            var filePaths = Directory.EnumerateFiles(folderPath, "*.*");
+            var imageFiles = filePaths.Where(file => ext.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase))).ToList();
+            var pdfFiles = filePaths.Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
 
             //Parallel.ForEach(imageFiles, file =>
             //{
@@ -38,31 +38,50 @@ namespace WordCounterBase.Processors
             //    );
             //});
 
-            foreach (var file in files)
+            foreach (var filePath in filePaths)
             {
-                var scannedDocument = false;
-                var wordQty = default(int);
-                if(file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                if(filePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    wordQty = PdfProcessor.GetWordCount(file);
+                    var scannedDocument = false;
+                    var pdfProcessingResult = new PdfProcessingResult();
+                    pdfProcessingResult = PdfProcessor.ProcessFile(filePath);
 
-                    if (wordQty == 0)
+                    if (pdfProcessingResult.WordCount == 0)
                     {
-                        var tempPathToImages = PdfProcessor.Pdf2Image(file);
-                        wordQty = ProcessImagesFromPDF(tempPathToImages);
-                        if (wordQty > 0) scannedDocument = true;
+                        var tempPathToImages = PdfProcessor.Pdf2Image(filePath);
+                        pdfProcessingResult.WordCount = ProcessImagesFromPDF(tempPathToImages);
+                        if (pdfProcessingResult.WordCount > 0) scannedDocument = true;
                     }
-                }
 
-                result.Add(
+                    result.Add(
                     new WordCountResult()
                     {
-                        FileName = file,
-                        WordCount = wordQty,
-                        ScannedDocument = scannedDocument
+                        FileName = filePath,
+                        WordCount = pdfProcessingResult?.WordCount ?? 0,
+                        ScannedDocument = scannedDocument,
+                        PageCount = pdfProcessingResult?.PageCount ?? 0
                     }
                 );
+                }
+
+
+                if (filePath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+
+                    var pdfProcessingResult = JsonProcessor.ProcessFile(filePath);
+
+                    result.Add(
+                    new WordCountResult()
+                    {
+                        FileName = filePath,
+                        WordCount = pdfProcessingResult?.WordCount ?? 0,
+                        ScannedDocument = false,
+                        PageCount = 0
+                    });
+                }
             }
+
+
 
             var subfolders = Directory.EnumerateDirectories(folderPath);
             foreach (string subfolder in subfolders)

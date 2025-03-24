@@ -3,22 +3,26 @@ using iText.Kernel.Pdf.Canvas.Parser;
 using iText.Kernel.Pdf;
 using PdfiumViewer;
 using System.Drawing;
+using WordCounterBase.Models;
 
 
 namespace WordCounterBase.Processors
 {
     internal static class PdfProcessor
     {
-        internal static int GetWordCount(string pdfFilePath)
+        internal static PdfProcessingResult ProcessFile(string pdfFilePath)
         {
-            string pdfText = ExtractTextFromPdf(pdfFilePath);
-            return WordProcessor.CountWords(pdfText);
+            using iText.Kernel.Pdf.PdfDocument pdfDocument = new iText.Kernel.Pdf.PdfDocument(new PdfReader(pdfFilePath));
+            int totalPages = pdfDocument.GetNumberOfPages();
+
+            string pdfText = ExtractTextFromPdf(pdfDocument);
+            int wordCount = WordProcessor.CountWords(pdfText);
+            return new PdfProcessingResult() { PageCount = totalPages, WordCount = wordCount };
         }
 
 
-        private static string ExtractTextFromPdf(string pdfFilePath)
+        private static string ExtractTextFromPdf(iText.Kernel.Pdf.PdfDocument pdfDocument)
         {
-            using iText.Kernel.Pdf.PdfDocument pdfDocument = new iText.Kernel.Pdf.PdfDocument(new PdfReader(pdfFilePath));
             StringWriter textWriter = new StringWriter();
             for (int page = 1; page <= pdfDocument.GetNumberOfPages(); page++)
             {

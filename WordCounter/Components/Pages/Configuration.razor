@@ -1,7 +1,36 @@
 ﻿@page "/configuration"
+@using WordCounterBase.Models;
+@inject NavigationManager Navigation
+
 
 <h3>Configuration</h3>
 
-@code {
+<input id="regexJson" @bind-value="@ImportKeys" type="text" style="width: 300px;" />
 
+
+@code {
+    private string? _ImportKeys;
+
+    public string? ImportKeys
+    {
+        get { return String.Join(", ", JsonProcessingConfiguration.ImportKeys); }
+        set
+        {
+            _ImportKeys = value;
+            ChangeImportKey();
+        }
+    }
+
+    void ChangeImportKey()
+    {
+        if (string.IsNullOrEmpty(_ImportKeys)) return;
+        JsonProcessingConfiguration.ImportKeys = _ImportKeys.Split(',').ToList();
+    }
+
+    private ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        ChangeImportKey();
+
+        return ValueTask.CompletedTask;
+    }
 }

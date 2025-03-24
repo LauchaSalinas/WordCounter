@@ -5,6 +5,7 @@
 @using CommunityToolkit.Maui.Storage
 @using WordCounterBase.Models
 @using WordCounterBase.Processors
+@using System.Diagnostics
 
 <h3>Word Counter</h3>
 
@@ -26,6 +27,16 @@
     <label id="totalWordsAllFiles" style="width: 300px;">@totalWordsAllFiles</label>
 </div>
 
+<div>
+    <label for="totalPagesAllFiles">Total Pages:</label>
+    <label id="totalPagesAllFiles" style="width: 300px;">@totalPagesAllFiles</label>
+</div>
+
+<div>
+    <label for="timeSpentQuery">Duration:</label>
+    <label id="timeSpentQuery" style="width: 300px;">@timeSpentQuery.ToString()</label>
+</div>
+
 <br />
 
 
@@ -40,6 +51,7 @@ else
             <tr>
                 <th class="fileColumn">File</th>
                 <th class="wordsColumn">Words</th>
+                <th class="pageCountColumn">Pages</th>
                 <th class="scannedColumn">Scanned</th>
             </tr>
         </thead>
@@ -48,6 +60,7 @@ else
             <tr>
                 <td class="fileColumn">@result.FileName.Replace(rootFolderPath+"\\", string.Empty)</td>
                 <td class="wordsColumn">@result.WordCount</td>
+                <td class="pageCountColumn">@result.PageCount</td>
                 <td class="scannedColumn">@(result.ScannedDocument ? "✓" : string.Empty)</td>
             </tr>
         }
@@ -59,6 +72,8 @@ else
     private string rootFolderPath = string.Empty;
     private List<WordCountResult> wordCountResults = new List<WordCountResult>();
     private int totalWordsAllFiles = 0;
+    private TimeSpan timeSpentQuery = TimeSpan.Zero;
+    private int totalPagesAllFiles = 0;
     private bool processing = false;
 
     async Task PickFolder()
@@ -82,12 +97,20 @@ else
         StateHasChanged();
 
         wordCountResults.Clear(); // Clear previous results
+
+        var stpwtch = new Stopwatch();
+        stpwtch.Start();
+
         await Task.Run(() =>
         {
             wordCountResults = FolderProcessor.ProcessFolder(rootFolderPath);
         });
 
+
         totalWordsAllFiles = wordCountResults.Sum(result => result.WordCount);
+        totalPagesAllFiles = wordCountResults.Sum(result => result.PageCount);
+        stpwtch.Stop();
+        timeSpentQuery = stpwtch.Elapsed;
 
         processing = false;
 
